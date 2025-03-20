@@ -1,0 +1,164 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "name": "Cluster Basics",
+      "description": "The galactic federation's outpost needs basic reconnaissance.",
+      "missions": [
+        {
+          "id": "1-1",
+          "badge": "01",
+          "title": "Deploy Scout Pod",
+          "description": "Deploy a single nginx pod to scan for alien signals.",
+          "command": "kubectl run scout-pod --image=nginx --restart=Never",
+          "hint": "Use kubectl run with nginx image to create a non-restarting pod",
+          "points": 10,
+          "achievement": "First Deployment"
+        },
+        {
+          "id": "1-2",
+          "badge": "02",
+          "title": "Pod Intelligence",
+          "description": "Get detailed information about the scout pod.",
+          "command": "kubectl describe pod scout-pod",
+          "hint": "Use kubectl describe to get detailed information about resources",
+          "points": 15,
+          "achievement": "Pod Inspector"
+        },
+        {
+          "id": "1-3",
+          "badge": "03",
+          "title": "Pod Logs",
+          "description": "Check the scout pod's communications log.",
+          "command": "kubectl logs scout-pod",
+          "hint": "Use kubectl logs to view pod output",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Deployments & Services",
+      "description": "The outpost needs to expand its fleet and establish communications.",
+      "missions": [
+        {
+          "id": "2-1",
+          "badge": "01",
+          "title": "Deploy Fleet",
+          "description": "Deploy a fleet of 3 nginx pods using Deployments.",
+          "command": "kubectl create deployment fleet --image=nginx --replicas=3",
+          "hint": "Use kubectl create deployment with the --replicas flag",
+          "points": 20,
+          "achievement": "Fleet Commander"
+        },
+        {
+          "id": "2-2",
+          "badge": "02",
+          "title": "Fleet Scaling",
+          "description": "Increase fleet size to 5 pods to extend scanning range.",
+          "command": "kubectl scale deployment fleet --replicas=5",
+          "hint": "Use kubectl scale to change the number of replicas",
+          "points": 20
+        },
+        {
+          "id": "2-3",
+          "badge": "03",
+          "title": "Communication Service",
+          "description": "Create a service to enable fleet communications.",
+          "command": "kubectl expose deployment fleet --port=80 --type=NodePort --name=fleet-comms",
+          "hint": "Use kubectl expose to create a service from a deployment",
+          "points": 25
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Configuration & Storage",
+      "description": "Secure configurations and data storage are needed for long-term operations.",
+      "missions": [
+        {
+          "id": "3-1",
+          "badge": "01",
+          "title": "Secret Intelligence",
+          "description": "Create a secret to store sensitive communication codes.",
+          "command": "kubectl create secret generic comm-codes --from-literal=access_key=galactic-1138 --from-literal=secret_key=r2d2-c3po",
+          "hint": "Use kubectl create secret generic with --from-literal for key-value pairs",
+          "points": 25
+        },
+        {
+          "id": "3-2",
+          "badge": "02",
+          "title": "ConfigMap Relay",
+          "description": "Create a ConfigMap with non-sensitive relay configurations.",
+          "command": "kubectl create configmap relay-config --from-literal=broadcast_freq=384.5 --from-literal=protocol=quantum-tcp",
+          "hint": "Use kubectl create configmap with --from-literal for key-value pairs",
+          "points": 25
+        },
+        {
+          "id": "3-3",
+          "badge": "03",
+          "title": "Persistent Data Storage",
+          "description": "Create a PersistentVolumeClaim for storing long-term mission data.",
+          "command": "kubectl apply -f - << EOF\napiVersion: v1\nkind: PersistentVolumeClaim\nmetadata:\n  name: mission-data\nspec:\n  accessModes:\n    - ReadWriteOnce\n  resources:\n    requests:\n      storage: 1Gi\nEOF",
+          "hint": "Create a PVC with ReadWriteOnce access mode and request 1Gi of storage",
+          "points": 30
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Advanced Networking",
+      "description": "Establish secure network pathways across the galactic cluster.",
+      "missions": [
+        {
+          "id": "4-1",
+          "badge": "01",
+          "title": "Ingress Gateway",
+          "description": "Create an Ingress resource to route external traffic.",
+          "command": "kubectl apply -f - << EOF\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: fleet-gateway\n  annotations:\n    nginx.ingress.kubernetes.io/rewrite-target: /\nspec:\n  rules:\n  - http:\n      paths:\n      - path: /fleet\n        pathType: Prefix\n        backend:\n          service:\n            name: fleet-comms\n            port:\n              number: 80\nEOF",
+          "hint": "Create an Ingress resource that routes /fleet to your fleet-comms service",
+          "points": 35
+        },
+        {
+          "id": "4-2",
+          "badge": "02",
+          "title": "Network Policies",
+          "description": "Implement a Network Policy to restrict unauthorized communication.",
+          "command": "kubectl apply -f - << EOF\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: fleet-security\nspec:\n  podSelector:\n    matchLabels:\n      app: fleet\n  policyTypes:\n  - Ingress\n  - Egress\n  ingress:\n  - from:\n    - podSelector:\n        matchLabels:\n          role: authorized\n    ports:\n    - protocol: TCP\n      port: 80\n  egress:\n  - to:\n    - podSelector:\n        matchLabels:\n          role: database\n    ports:\n    - protocol: TCP\n      port: 5432\nEOF",
+          "hint": "Create a NetworkPolicy with specific ingress and egress rules",
+          "points": 40
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Security & Troubleshooting",
+      "description": "Secure the cluster and repair critical systems.",
+      "missions": [
+        {
+          "id": "5-1",
+          "badge": "01",
+          "title": "RBAC Security",
+          "description": "Create a Role and RoleBinding for secure fleet operations.",
+          "command": "kubectl apply -f - << EOF\napiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  namespace: default\n  name: fleet-operator\nrules:\n- apiGroups: [\"\"]\n  resources: [\"pods\", \"services\"]\n  verbs: [\"get\", \"list\", \"watch\"]\n- apiGroups: [\"apps\"]\n  resources: [\"deployments\"]\n  verbs: [\"get\", \"list\", \"watch\", \"update\"]\n---\napiVersion: rbac.authorization.k8s.io/v1\nkind: RoleBinding\nmetadata:\n  name: fleet-operator-binding\n  namespace: default\nsubjects:\n- kind: ServiceAccount\n  name: fleet-sa\n  namespace: default\nroleRef:\n  kind: Role\n  name: fleet-operator\n  apiGroup: rbac.authorization.k8s.io\nEOF",
+          "hint": "Create a Role with limited permissions and bind it to a ServiceAccount",
+          "points": 45
+        }
+      ]
+    }
+  ],
+  "achievements": [
+    {
+      "id": "First Deployment",
+      "description": "Deployed your first pod!"
+    },
+    {
+      "id": "Pod Inspector",
+      "description": "Inspected pod details!"
+    },
+    {
+      "id": "Fleet Commander",
+      "description": "Deployed a fleet of pods!"
+    }
+  ]
+}
